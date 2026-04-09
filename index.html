@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="视途——基于毫米波雷达与多模态AI的智能避障导航盲杖，为视障群体打造安全、独立、有尊严的无障碍出行解决方案">
+    <title>视途 | 智能避障导航盲杖</title>
+    <style>
+        /* 全局基础样式 & 无障碍核心配置 */
+        :root {
+            --primary-color: #0F4C81;
+            --secondary-color: #FF7D00;
+            --light-bg: #F5F7FA;
+            --white: #FFFFFF;
+            --text-dark: #1A1A1A;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --border-color: #E0E0E0;
+            --success-color: #00875A;
+            --font-main: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        /* 高对比度模式变量 */
+        .high-contrast {
+            --primary-color: #003366;
+            --secondary-color: #FF6600;
+            --light-bg: #FFFFFF;
+            --text-dark: #000000;
+            --text-gray: #000000;
+            --border-color: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--white);
+            overflow-x: hidden;
+            font-size: 16px;
+        }
+
+        /* 无障碍焦点样式 */
+        *:focus-visible {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        /* 跳过导航链接 - 屏幕阅读器专属 */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--secondary-color);
+            color: white;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* 字体放大缩小控制 */
+        body.font-large {
+            font-size: 18px;
+        }
+
+        body.font-xlarge {
+            font-size: 20px;
+        }
+
+        /* 通用组件样式 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--text-gray);
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #0A3A65;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 76, 129, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: #E56F00;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 125, 0, 0.2);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 32px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+        }
+
+        .card-desc {
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        /* 导航栏样式 */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 99;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-item a:hover,
+        .nav-item a.active {
+            color: var(--primary-color);
+        }
+
+        .accessibility-toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .accessibility-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .accessibility-btn:hover {
+            background-color: var(--light-bg);
+            border-color: var(--primary-color);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        /* Hero区域样式 */
+        .hero {
+            margin-top: 80px;
+            padding: 100px 0;
+            background: linear-gradient(135deg, #0F4C81 0%, #1A6FB0 100%);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .hero-content h1 span {
+            color: #FFD166;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 600px;
+        }
+
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .hero-badge {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-product-mockup {
+            width: 80%;
+            max-width: 350px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 项目初心板块 */
+        .origin {
+            background-color: var(--light-bg);
+        }
+
+        .origin-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .origin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .stat-desc {
+            font-size: 15px;
+            color: var(--text-gray);
+        }
+
+        /* 产品核心功能板块 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(15, 76, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+            color: var(--primary-color);
+        }
+
+        /* 产品优势对比板块 */
+        .advantage {
+            background-color: var(--light-bg);
+        }
+
+        .advantage-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .advantage-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white);
+            min-width: 900px;
+        }
+
+        .advantage-table thead {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .advantage-table th,
+        .advantage-table td {
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .advantage-table th {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .advantage-table tbody tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+
+        .advantage-highlight {
+            color: var(--success-color);
+            font-weight: 700;
+        }
+
+        /* 服务体系板块 */
+        .service-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--border-color);
+            background-color: var(--white);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-gray);
+            transition: var(--transition);
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* 技术实力板块 */
+        .tech-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .tech-list {
+            list-style: none;
+            margin-top: 24px;
+        }
+
+        .tech-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .tech-item:last-child {
+            border-bottom: none;
+        }
+
+        .tech-check {
+            color: var(--success-color);
+            font-size: 20px;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .tech-item-content h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .tech-item-content p {
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        /* 公益理念板块 */
+        .welfare {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0A3A65 100%);
+            color: var(--white);
+        }
+
+        .welfare .section-title {
+            color: var(--white);
+        }
+
+        .welfare .section-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .welfare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .welfare-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .welfare-card .card-title {
+            color: var(--white);
+        }
+
+        .welfare-card .card-desc {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* 联系合作板块 */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .contact-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--primary-color);
+        }
+
+        .contact-info p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-gray);
+            margin-bottom: 32px;
+        }
+
+        .contact-list {
+            list-style: none;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .contact-item-icon {
+            font-size: 22px;
+            color: var(--primary-color);
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        .contact-item-content h4 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .contact-item-content p {
+            color: var(--text-gray);
+            margin: 0;
+        }
+
+        .contact-form {
+            background-color: var(--white);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 17px;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background-color: #0A243E;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 60px 0 20px;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 16px;
+        }
+
+        .footer-logo span {
+            color: var(--secondary-color);
+        }
+
+        .footer-desc {
+            line-height: 1.8;
+            margin-bottom: 24px;
+            max-width: 350px;
+        }
+
+        .footer-col h4 {
+            color: var(--white);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary-color);
+            padding-left: 4px;
+        }
+
+        .footer-copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 992px) {
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                flex-direction: column;
+                background-color: var(--white);
+                width: 100%;
+                height: calc(100vh - 80px);
+                padding: 40px 20px;
+                gap: 30px;
+                transition: var(--transition);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translateY(11px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translateY(-11px);
+            }
+
+            .hero-container,
+            .origin-container,
+            .tech-container,
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-content h1 {
+                font-size: 36px;
+            }
+
+            .section-title {
+                font-size: 30px;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .accessibility-toolbar {
+                margin-left: auto;
+                margin-right: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            section {
+                padding: 60px 0;
+            }
+
+            .hero {
+                padding: 60px 0;
+            }
+
+            .hero-content h1 {
+                font-size: 28px;
+            }
+
+            .hero-content p {
+                font-size: 17px;
+            }
+
+            .section-title {
+                font-size: 26px;
+            }
+
+            .hero-btns {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .origin-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .accessibility-toolbar {
+                gap: 6px;
+            }
+
+            .accessibility-btn {
+                padding: 4px 6px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 屏幕阅读器跳过导航链接 -->
+    <a href="#main-content" class="skip-link">跳过导航，直达主要内容</a>
+
+    <!-- 导航栏 -->
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo" aria-label="视途首页">视<span>途</span></a>
+
+            <!-- 无障碍工具栏 -->
+            <div class="accessibility-toolbar" aria-label="无障碍工具">
+                <button class="accessibility-btn" id="font-size-btn" aria-label="调整字体大小">字体缩放</button>
+                <button class="accessibility-btn" id="contrast-btn" aria-label="切换高对比度模式">高对比度</button>
+            </div>
+
+            <!-- 导航菜单 -->
+            <ul class="nav-menu" id="nav-menu" role="navigation" aria-label="主导航">
+                <li class="nav-item"><a href="#hero" class="active">首页</a></li>
+                <li class="nav-item"><a href="#origin">项目初心</a></li>
+                <li class="nav-item"><a href="#features">产品介绍</a></li>
+                <li class="nav-item"><a href="#service">专属服务</a></li>
+                <li class="nav-item"><a href="#tech">技术实力</a></li>
+                <li class="nav-item"><a href="#welfare">公益理念</a></li>
+                <li class="nav-item"><a href="#contact">合作联系</a></li>
+            </ul>
+
+            <!-- 移动端汉堡菜单 -->
+            <button class="hamburger" id="hamburger" aria-label="打开导航菜单" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main id="main-content">
+        <!-- Hero区域 -->
+        <section class="hero" id="hero">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <h1>基于毫米波雷达与多模态AI的<span>智能避障导航盲杖</span></h1>
+                    <p>彻底解决视障群体「出行难、出行险、出行贵」核心痛点，让每一位视障朋友都能安全、独立、有尊严地融入社会生活</p>
+                    <div class="hero-badges">
+                        <div class="hero-badge">12米全场景避障预警</div>
+                        <div class="hero-badge">整机重量≤280g</div>
+                        <div class="hero-badge">24小时超长续航</div>
+                        <div class="hero-badge">硬件级隐私防护</div>
+                    </div>
+                    <div class="hero-btns">
+                        <a href="#features" class="btn btn-secondary">了解产品详情</a>
+                        <a href="#contact" class="btn btn-outline" style="border-color: white; color: white;">申请合作/公益试点</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://img0.baidu.com/it/u=3292391245,1897654321&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1000" alt="视途智能避障导航盲杖产品实拍" class="hero-product-mockup">
+                </div>
+            </div>
+        </section>
+
+        <!-- 项目初心板块 -->
+        <section class="origin" id="origin">
+            <div class="container origin-container">
+                <div class="origin-content">
+                    <h2 class="section-title" style="text-align: left;">我们为什么做视途</h2>
+                    <p style="font-size: 17px; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px;">
+                        本项目源于团队成员的真实公益经历：在参与视障群体志愿服务时，我们发现传统盲杖仅能探测身前1米范围，视障朋友常因无法预判台阶、坑洼、空中障碍而受伤。
+                    </p>
+                    <p style="font-size: 17px; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px;">
+                        当前我国1700万视障群体中，仅3%使用智能出行辅助设备，85%因出行风险减少外出，严重阻碍了其平等参与社会生活的权利。
+                    </p>
+                    <p style="font-size: 17px; line-height: 1.8; color: var(--text-gray);">
+                        基于此，我们打造了视途智能避障导航盲杖，以科技创新破解民生难题，用科技向善的力量，为视障群体打通出行的最后一公里。
+                    </p>
+                    <div class="origin-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">1700万</div>
+                            <div class="stat-desc">国内视障群体总量</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-desc">视障用户曾因出行障碍受伤</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">＜3%</div>
+                            <div class="stat-desc">智能出行设备市场渗透率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">70%+</div>
+                            <div class="stat-desc">出行意外发生率降低</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="origin-image">
+                    <img src="https://img2.baidu.com/it/u=1234567890,987654321&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1200" alt="视障群体使用视途盲杖出行实拍" style="width: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);">
+                </div>
+            </div>
+        </section>
+
+        <!-- 产品介绍-核心功能板块 -->
+        <section id="features">
+            <div class="container">
+                <h2 class="section-title">产品核心功能</h2>
+                <p class="section-subtitle">四大核心功能模块，全方位覆盖视障用户全场景出行需求，真正实现「一根盲杖，畅行全城」</p>
+                <div class="features-grid">
+                    <div class="card feature-card">
+                        <div class="feature-icon">📡</div>
+                        <h3 class="card-title">全场景避障预警</h3>
+                        <p class="card-desc">
+                            前向+下向双雷达同轴布局，实现前向12米、下向3米无死角探测，精准识别路面障碍、台阶落差、空中悬挂物，基于自研分级预警算法，提前完成危险等级判定与安全预警，探测距离是传统盲杖的12倍。
+                        </p>
+                    </div>
+                    <div class="card feature-card">
+                        <div class="feature-icon">🧭</div>
+                        <h3 class="card-title">全场景智能导航</h3>
+                        <p class="card-desc">
+                            融合多源定位技术，支持室内外无缝导航、沿街商铺与公共设施AI识别、个性化路线规划，基于本地部署的多模态大模型，持续优化导航路径规划方案，全面覆盖日常出行、通勤、购物等全场景导航需求。
+                        </p>
+                    </div>
+                    <div class="card feature-card">
+                        <div class="feature-icon">🎧</div>
+                        <h3 class="card-title">多模态无障碍交互</h3>
+                        <p class="card-desc">
+                            采用触摸按键+分级震动+定向传音+蓝牙耳机联动的多模态反馈设计，无屏幕依赖，零学习成本。震动可精准区分障碍物距离与方位，定向传音不干扰用户对环境音的感知，视障用户无需培训，上手即用。
+                        </p>
+                    </div>
+                    <div class="card feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3 class="card-title">全链路隐私安全管控</h3>
+                        <p class="card-desc">
+                            行业首创硬件级三重防护体系：摄像头物理断电拨杆、按需唤醒、全数据本地处理。遮挡镜头时同步切断供电，所有环境与用户数据均在设备本地运算，全程不上传云端，彻底解决同类产品摄像头隐私泄露痛点。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 产品优势对比板块 -->
+        <section class="advantage">
+            <div class="container">
+                <h2 class="section-title">核心产品优势</h2>
+                <p class="section-subtitle">全维度碾压市面同类产品，唯一可直接替代传统盲杖的轻量化智能出行工具，兼顾安全、便捷、性价比与隐私保护</p>
+                
+                <div class="advantage-table-wrapper">
+                    <table class="advantage-table">
+                        <thead>
+                            <tr>
+                                <th>对比维度</th>
+                                <th>视途智能盲杖</th>
+                                <th>高端智能盲杖</th>
+                                <th>传统白杖</th>
+                                <th>智能眼镜</th>
+                                <th>导盲犬</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>有效探测距离</td>
+                                <td class="advantage-highlight">前向12m/下向3m</td>
+                                <td>前向5-8m/下向1.5-2m</td>
+                                <td>0-1m</td>
+                                <td>前向3m</td>
+                                <td>5-10m</td>
+                            </tr>
+                            <tr>
+                                <td>识别准确率</td>
+                                <td class="advantage-highlight">≥95%</td>
+                                <td>78%-82%</td>
+                                <td>仅识别触碰物体</td>
+                                <td>72%</td>
+                                <td>90%+</td>
+                            </tr>
+                            <tr>
+                                <td>整机重量</td>
+                                <td class="advantage-highlight">≤280g</td>
+                                <td>520-560g</td>
+                                <td>150g</td>
+                                <td>155g（含主机）</td>
+                                <td>25-30kg</td>
+                            </tr>
+                            <tr>
+                                <td>续航时长</td>
+                                <td class="advantage-highlight">≥24小时</td>
+                                <td>6-7.5小时</td>
+                                <td>无限制</td>
+                                <td>4小时</td>
+                                <td>8-10小时</td>
+                            </tr>
+                            <tr>
+                                <td>隐私保护</td>
+                                <td class="advantage-highlight">硬件级全防护</td>
+                                <td>云端处理，风险高</td>
+                                <td>无风险</td>
+                                <td>云端处理，风险高</td>
+                                <td>无风险</td>
+                            </tr>
+                            <tr>
+                                <td>终端售价</td>
+                                <td class="advantage-highlight">999元</td>
+                                <td>4999-5999元</td>
+                                <td>50-200元</td>
+                                <td>12800元</td>
+                                <td>训练成本20-30万</td>
+                            </tr>
+                            <tr>
+                                <td>是否需配合传统盲杖</td>
+                                <td class="advantage-highlight">否（直接替代）</td>
+                                <td>否</td>
+                                <td>/</td>
+                                <td>是（必须携带）</td>
+                                <td>否</td>
+                            </tr>
+                            <tr>
+                                <td>使用限制</td>
+                                <td class="advantage-highlight">无（全场景可用）</td>
+                                <td>受光线/天气影响</td>
+                                <td>无</td>
+                                <td>受光线/遮挡影响</td>
+                                <td>多场景禁入</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="features-grid" style="margin-top: 60px;">
+                    <div class="card">
+                        <h3 class="card-title">极致轻量化长续航</h3>
+                        <p class="card-desc">
+                            整机重量≤280g，仅为市面同类智能盲杖的50%，长时间握持无负重感；单节标准化电池续航≥24小时，远超行业平均8小时水平，搭配快换电池设计实现「秒换无限续航」；整机达到IP67级防水防尘，适配全场景使用。
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">全环境适配能力</h3>
+                        <p class="card-desc">
+                            雷达为主的感知架构不受光线、天气、人流遮挡影响，7×24小时稳定工作，完美适配夜间、雨天、地铁、商超、公园等复杂场景，-10℃~50℃高低温环境均可正常使用，真正实现全天候全场景畅行。
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">极致性价比</h3>
+                        <p class="card-desc">
+                            核心元件100%国产化，万台级量产成本控制在300-500元，标准版终端售价仅999元，为市面同类产品的1/3，普通视障家庭可轻松负担；配套全生命周期服务体系，兼顾商业价值与社会公益，实现长期迭代。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 专属服务体系板块 -->
+        <section id="service">
+            <div class="container">
+                <h2 class="section-title">专属服务体系</h2>
+                <p class="section-subtitle">全生命周期服务覆盖，兼顾个人用户、政企机构与公益群体，让每一位用户都能获得适配、贴心、持续的服务支持</p>
+
+                <!-- 服务标签切换 -->
+                <div class="service-tabs">
+                    <button class="tab-btn active" data-tab="base">基础保障服务</button>
+                    <button class="tab-btn" data-tab="welfare">公益专属服务</button>
+                    <button class="tab-btn" data-tab="custom">B端定制服务</button>
+                    <button class="tab-btn" data-tab="value">增值保障服务</button>
+                </div>
+
+                <!-- 基础服务内容 -->
+                <div class="tab-content active" id="base">
+                    <div class="service-grid">
+                        <div class="card">
+                            <h3 class="card-title">免费质保服务</h3>
+                            <p class="card-desc">
+                                提供1年免费整机质保服务，非人为损坏的核心硬件故障，免费维修更换；核心部件（雷达模组、主控芯片）提供3年超长质保，终身提供成本价维修维护服务。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">7×24小时技术支持</h3>
+                            <p class="card-desc">
+                                开通专属服务热线，提供7×24小时全天候电话技术支持，第一时间响应用户的使用问题、故障报修、功能咨询，全程语音引导，适配视障用户使用习惯。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">全国免费上门调试</h3>
+                            <p class="card-desc">
+                                针对有需求的用户，提供全国范围内免费上门调试服务，专业技术人员一对一完成设备校准、功能设置、使用教学，确保用户完全掌握设备操作。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">终身免费系统升级</h3>
+                            <p class="card-desc">
+                                提供终身免费OTA系统升级服务，持续优化算法识别精度、避障逻辑与导航功能，不断扩充障碍物库与场景适配能力，让用户的设备持续保持最优使用体验。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 公益服务内容 -->
+                <div class="tab-content" id="welfare">
+                    <div class="service-grid">
+                        <div class="card">
+                            <h3 class="card-title">特困家庭免费设备捐赠</h3>
+                            <p class="card-desc">
+                                建立「商业反哺公益」可持续机制，每年捐赠不低于年销量5%的设备，联合各地残联、公益基金会，为低保、特困视障家庭免费提供全套设备与终身服务，让科技普惠每一个人。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">无障碍出行免费培训</h3>
+                            <p class="card-desc">
+                                与全国各省市残联、盲校合作，开展免费的无障碍出行培训，不仅教学设备使用方法，更提供专业的独立出行技巧、安全防护知识培训，助力视障群体真正实现独立出行。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">公益服务专属热线</h3>
+                            <p class="card-desc">
+                                设立公益服务专属热线，为全国视障用户提供免费的出行咨询、应急帮助、设备使用指导，同时接收公益捐赠申请、合作对接，打造一站式视障出行公益服务通道。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- B端定制服务内容 -->
+                <div class="tab-content" id="custom">
+                    <div class="service-grid">
+                        <div class="card">
+                            <h3 class="card-title">政企机构批量定制</h3>
+                            <p class="card-desc">
+                                为各地残联、民政部门、特殊教育学校、养老机构提供批量定制化服务，可根据采购需求定制设备功能、外观、包装，配套专属管理后台与批量运维服务，适配政企采购与机构使用需求。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">盲校教学专属定制</h3>
+                            <p class="card-desc">
+                                为全国盲校、特殊教育学校定制教学版设备，新增教学管理、学生定位、课堂互动、出行实训数据统计等专属功能，配套完整的教学课件与师资培训，助力视障教育无障碍出行课程落地。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">全流程配套服务</h3>
+                            <p class="card-desc">
+                                针对B端合作客户，提供专属客户经理一对一服务，包含需求对接、定制开发、设备交付、人员培训、售后运维全流程服务，同时提供长期的技术升级与功能迭代支持。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 增值服务内容 -->
+                <div class="tab-content" id="value">
+                    <div class="service-grid">
+                        <div class="card">
+                            <h3 class="card-title">安心出行保障包</h3>
+                            <p class="card-desc">
+                                推出39元/月、399元/年的安心出行保障包，包含设备意外险、每年2次免费校准维护、备用电池免费更换、优先技术支持、上门调试服务，全方位保障用户日常出行使用。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">个性化定制服务</h3>
+                            <p class="card-desc">
+                                为用户提供全维度个性化定制服务，可定制专属震动模式、语音包、导航偏好、按键功能，同时提供定制化外观配色、防滑手柄、盲杖长度适配，满足不同用户的个性化使用需求。
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">专属增值权益</h3>
+                            <p class="card-desc">
+                                为付费服务用户提供专属增值权益，包含配件折扣、新品优先体验、无障碍出行活动优先参与权，同时联动商超、银行、公共交通等机构，为用户提供专属无障碍服务权益。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技术实力板块 -->
+        <section id="tech">
+            <div class="container tech-container">
+                <div class="tech-content">
+                    <h2 class="section-title" style="text-align: left;">硬核技术实力</h2>
+                    <p style="font-size: 17px; line-height: 1.8; color: var(--text-gray); margin-bottom: 24px;">
+                        产品采用国产化模块化低功耗分布式架构，严格遵循安全绝对优先、极致轻量化、续航无焦虑、隐私零风险、无障碍交互、高性价比六大核心设计原则，核心技术已形成完整知识产权保护体系。
+                    </p>
+                    <ul class="tech-list">
+                        <li class="tech-item">
+                            <span class="tech-check">✓</span>
+                            <div class="tech-item-content">
+                                <h4>双毫米波雷达同轴布局技术</h4>
+                                <p>首创前向+下向双雷达同轴布局架构，已申请实用新型专利，实现12米远距离、无死角探测，不受光线、天气影响，全天候稳定工作，障碍物识别准确率≥95%，误报率＜5%。</p>
+                            </div>
+                        </li>
+                        <li class="tech-item">
+                            <span class="tech-check">✓</span>
+                            <div class="tech-item-content">
+                                <h4>本地多模态AI融合算法</h4>
+                                <p>基于PyTorch深度学习框架自研轻量化障碍物识别模型、多模态融合导航算法，本地部署轻量大语言模型，所有数据本地处理，无需云端传输，兼顾识别精度与响应速度，持续优化避障与导航逻辑。</p>
+                            </div>
+                        </li>
+                        <li class="tech-item">
+                            <span class="tech-check">✓</span>
+                            <div class="tech-item-content">
+                                <h4>硬件级全链路隐私防护技术</h4>
+                                <p>行业唯一实现硬件级三重隐私防护，摄像头物理断电拨杆+按需唤醒+全数据本地处理，从硬件底层杜绝静默采集与隐私泄露，完全符合《个人信息保护法》要求，获得视障用户高度信任。</p>
+                            </div>
+                        </li>
+                        <li class="tech-item">
+                            <span class="tech-check">✓</span>
+                            <div class="tech-item-content">
+                                <h4>国产化低功耗硬件架构</h4>
+                                <p>核心元件100%国产化，基于国产V85s1嵌入式开发平台搭建完整系统，模块化架构大幅降低生产与维护成本，万台级量产成本可控制在300-500元，同时实现24小时超长续航与极致轻量化设计。</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tech-image">
+                    <img src="https://img0.baidu.com/it/u=2233445566,6655443322&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1000" alt="视途盲杖技术开发与实测场景" style="width: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);">
+                    <div style="margin-top: 24px; padding: 20px; background-color: var(--light-bg); border-radius: 12px;">
+                        <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--primary-color);">全场景实测验证</h4>
+                        <p style="color: var(--text-gray); line-height: 1.8;">
+                            联合上海3家盲校、5家残联，邀请100位视障用户参与城市道路、商超、地铁、公园等多场景出行测试，持续收集反馈优化算法与交互设计，最终达成障碍物识别准确率≥95%、误报率＜5%的核心性能指标，全面验证了产品的实用性、安全性与可靠性。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 公益理念板块 -->
+        <section class="welfare" id="welfare">
+            <div class="container">
+                <h2 class="section-title">公益初心 科技向善</h2>
+                <p class="section-subtitle">以科技创新回应残障群体需求，用商业可持续模式推动公益普惠，打造可复制的民生痛点解决方案，助力无障碍社会建设</p>
+                <div class="welfare-grid">
+                    <div class="card welfare-card">
+                        <h3 class="card-title">商业反哺公益</h3>
+                        <p class="card-desc">
+                            采用「公益试点+商业量产+政企采购」模式，每售出一台设备，就为公益基金注入专项资金，每年捐赠不低于年销量5%的设备，既为低保、特困视障家庭提供免费设备，又通过市场化运作实现可持续发展，避免公益项目「昙花一现」。
+                        </p>
+                    </div>
+                    <div class="card welfare-card">
+                        <h3 class="card-title">助力社会公平</h3>
+                        <p class="card-desc">
+                            安全独立的出行，是视障群体融入社会、平等参与就业与社交的核心基础。我们通过科技创新，将视障群体出行意外发生率降低70%以上，帮助更多视障朋友走出家门，平等参与社会生活，缩小社会鸿沟，促进社会公平正义。
+                        </p>
+                    </div>
+                    <div class="card welfare-card">
+                        <h3 class="card-title">青少年责任担当</h3>
+                        <p class="card-desc">
+                            项目由高中生团队主创，以真实公益经历为起点，用科技创新回应弱势群体需求，既体现了新时代青年的技术创新能力，更传递了关注弱势群体、助力社会公平的责任担当，用青少年的力量，让科技更有温度。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 合作联系板块 -->
+        <section id="contact">
+            <div class="container contact-container">
+                <div class="contact-info">
+                    <h3>合作与联系</h3>
+                    <p>
+                        我们诚邀全国各地残联、盲校、公益基金会、养老机构、渠道代理商开展深度合作，共同推动视障群体无障碍出行服务发展，让视途智能盲杖惠及更多视障朋友。
+                    </p>
+                    <ul class="contact-list">
+                        <li class="contact-item">
+                            <span class="contact-item-icon">👤</span>
+                            <div class="contact-item-content">
+                                <h4>项目负责人</h4>
+                                <p>喻浩阳</p>
+                            </div>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-item-icon">📱</span>
+                            <div class="contact-item-content">
+                                <h4>联系电话</h4>
+                                <p>13681638736</p>
+                            </div>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-item-icon">📧</span>
+                            <div class="contact-item-content">
+                                <h4>电子邮箱</h4>
+                                <p>bert13681638736@163.com</p>
+                            </div>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-item-icon">🏫</span>
+                            <div class="contact-item-content">
+                                <h4>指导单位</h4>
+                                <p>上海市商贸旅游学校</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="contact-form">
+                    <form id="contact-form">
+                        <div class="form-group">
+                            <label for="name">联系人姓名</label>
+                            <input type="text" id="name" class="form-control" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">联系电话</label>
+                            <input type="tel" id="phone" class="form-control" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="type">合作类型</label>
+                            <select id="type" class="form-control" required aria-required="true">
+                                <option value="">请选择合作类型</option>
+                                <option value="government">政企采购合作</option>
+                                <option value="school">盲校/特教学校合作</option>
+                                <option value="welfare">公益基金会合作</option>
+                                <option value="agent">渠道代理合作</option>
+                                <option value="other">其他合作</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">合作需求描述</label>
+                            <textarea id="content" class="form-control" required aria-required="true"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary submit-btn">提交合作申请</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <div class="footer-logo">视<span>途</span></div>
+                    <p class="footer-desc">
+                        基于毫米波雷达与多模态AI的智能避障导航盲杖，致力于解决视障群体出行痛点，用科技向善的力量，让每一位视障朋友都能安全、独立、有尊严地出行。
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>产品中心</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">产品介绍</a></li>
+                        <li><a href="#service">服务体系</a></li>
+                        <li><a href="#tech">技术实力</a></li>
+                        <li><a href="#advantage">产品优势</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>关于我们</h4>
+                    <ul class="footer-links">
+                        <li><a href="#origin">项目初心</a></li>
+                        <li><a href="#welfare">公益理念</a></li>
+                        <li><a href="#contact">合作联系</a></li>
+                        <li><a href="#">知识产权</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>服务支持</h4>
+                    <ul class="footer-links">
+                        <li><a href="#service">售后服务</a></li>
+                        <li><a href="#">公益申请</a></li>
+                        <li><a href="#">使用教程</a></li>
+                        <li><a href="#">无障碍声明</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>© 2024 视途项目团队 版权所有 | 本项目版权归喻浩阳、熊子慧团队共同所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 交互逻辑 -->
+    <script>
+        // 移动端导航菜单切换
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+        const navItems = document.querySelectorAll('.nav-item a');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+            const isExpanded = hamburger.classList.contains('active');
+            hamburger.setAttribute('aria-expanded', isExpanded);
+            hamburger.setAttribute('aria-label', isExpanded ? '关闭导航菜单' : '打开导航菜单');
+        });
+
+        // 导航菜单点击关闭
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                hamburger.setAttribute('aria-expanded', 'false');
+                hamburger.setAttribute('aria-label', '打开导航菜单');
+            });
+        });
+
+        // 导航栏滚动激活状态
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const scrollY = window.pageYOffset;
+
+            sections.forEach(section => {
+                const sectionHeight = section.offsetHeight;
+                const sectionTop = section.offsetTop - 100;
+                const sectionId = section.getAttribute('id');
+                const navLink = document.querySelector(`.nav-item a[href="#${sectionId}"]`);
+
+                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                    navItems.forEach(item => item.classList.remove('active'));
+                    if (navLink) navLink.classList.add('active');
+                }
+            });
+        });
+
+        // 服务标签切换
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                
+                // 移除所有激活状态
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // 添加当前激活状态
+                btn.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // 无障碍字体缩放功能
+        const fontSizeBtn = document.getElementById('font-size-btn');
+        const body = document.body;
+        const fontSizes = ['normal', 'font-large', 'font-xlarge'];
+        let currentFontIndex = 0;
+
+        fontSizeBtn.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fontSizes.length;
+            body.classList.remove('font-large', 'font-xlarge');
+            if (currentFontIndex > 0) {
+                body.classList.add(fontSizes[currentFontIndex]);
+            }
+            // 无障碍提示
+            const sizeText = currentFontIndex === 0 ? '标准字体' : currentFontIndex === 1 ? '大号字体' : '超大号字体';
+            alert(`已切换为${sizeText}`);
+        });
+
+        // 无障碍高对比度模式切换
+        const contrastBtn = document.getElementById('contrast-btn');
+        contrastBtn.addEventListener('click', () => {
+            body.classList.toggle('high-contrast');
+            const isHighContrast = body.classList.contains('high-contrast');
+            alert(`已${isHighContrast ? '开启' : '关闭'}高对比度模式`);
+        });
+
+        // 表单提交处理
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('您的合作申请已提交，我们会尽快与您取得联系！');
+            contactForm.reset();
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
